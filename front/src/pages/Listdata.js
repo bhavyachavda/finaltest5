@@ -3,18 +3,20 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import image1 from './assets/images/uparrow.png';
 import image2 from './assets/images/downarrow.png'
-// import { CSVLink } from "react-csv";
+import { CSVLink } from "react-csv";
 
 const Listdata = () => {
   const [ans, setAns] = useState([]);
   const [reloadpage, setreloadpage] = useState(false);
   const [currentpage, setCurrentpage] = useState(0);
   const [total, setTotal] = useState(false);
-   const [searchdata, setSearchdata] = useState("");
+  const [searchdata, setSearchdata] = useState("");
   const [gender, setGender] = useState("");
   const [hobbies, setHobbies] = useState("");
   const [dispstatus, setDispstatus] = useState("");
   const [fdata, setFdata] = useState([]);
+  const [filedata, setFiledata] = useState("");
+  const [filter, setFilter] = useState(false);
 
   useEffect(()=>{
    setAns(fdata);
@@ -143,6 +145,32 @@ const Listdata = () => {
     }) 
   }
 
+  function reset() {
+    setSearchdata('')
+    setGender('')
+    setHobbies('')
+    setDispstatus('')
+    axios.get("http://localhost:8000/filterdata", { params: {params:{searchdata,gender,hobbies,dispstatus}}})
+    .then((res) => {
+        const ans = res.data;
+        // console.log(ans);
+        setFdata(res.data)
+    })
+    setFilter(false);
+}
+const headers = [
+  { label: "Code", key: "code" },
+  { label: "Firstname", key: "firstname" },
+  { label: "Lastname", key: "lastname" },
+  { label: "Email", key: "email" },
+  { label: "Gender", key: "gender" },
+  { label: "Hobbies", key: "hobbies" },
+  { label: "Country", key: "country" },
+  { label: "Photo", key: "photo" },
+  { label: "Status", key: "isactive" },
+  { label: "DateAdded", key: "dateadded" },
+  { label: "Dateupdated", key: "dateupdated" }
+];
   // const counted = employees.length;
   // const [pageNumber, setPageNumber] = useState(0);
   // const usersPerPage = 2;
@@ -154,14 +182,57 @@ const Listdata = () => {
 
   return (
     <div>
-      <input
+      <div align="right">
+                {filter ?
+                    <div>
+                        <input text='text' id='search' value={searchdata} name='search' placeholder='search' onChange={(e) => { setSearchdata(e.target.value) }} /> <br></br>
+                        <label htmlFor='gender'>Gender: </label>&nbsp;
+                        <input id='Male' type='radio' name='gender' value='Male' onChange={(e) => { setGender(e.target.value) }} />
+                        <label htmlFor='Male'>Male</label>&nbsp;
+                        <input id='Female' type='radio' name='gender' value='Female' onChange={(e) => { setGender(e.target.value) }} />
+                        <label htmlFor='Female'>Female</label>&nbsp;<br></br>
+                        <label htmlFor='hobbies'>Hobbies</label>&nbsp;
+                        <select id='hobbies' type='text' name='hobbies' onChange={(e) => {setHobbies(e.target.value)}}>
+                            <option value='select'>Select</option>
+                            <option value='Reading'>Reading</option>
+                            <option value='Travelling'>Travelling</option>
+                            <option value='Cricket'>Cricket</option>
+                            <option value='Music'>Music</option>
+                            <option value='Dancing'>Dancing</option>
+                        </select><br></br>
+                        {/* <label htmlFor='Status'>Status</label>&nbsp;
+                        <select id='Status' type='text' name='Status' onChange={(e) => {setDispstatus(e.target.value)}}>
+                            <option value='select'>Select</option>
+                            <option value='Y'>Active</option>
+                            <option value='N'>Inactive</option>
+                        </select><br></br> */}
+
+                        <button onClick={filterFunction}>Filter Data</button>&nbsp;
+                        <button onClick={reset}>Reset</button>
+                    </div>
+                    : <button onClick={(e) => { setFilter(true) }}>Filter</button>
+                }
+
+                    &nbsp; &nbsp;
+
+                <button> {filedata?.length &&
+                    <CSVLink
+                        headers={headers}
+                        data={filedata}
+                        target="_blank" >
+                        Export </CSVLink>}
+                </button>
+
+                &nbsp;&nbsp;
+            </div>
+      {/* <input
           type="search"
           placeholder="search"
           value={searchdata}
           onChange={(e) => setSearchdata(e.target.value)}
           style={{ marginTop: "1rem", marginLeft: "1rem" }}
       />
-      <button className="btn btn-dark" type="button" onClick={filterFunction}>Search</button>
+      <button className="btn btn-dark" type="button" onClick={filterFunction}>Search</button> */}
       
       <button
         type="button"
